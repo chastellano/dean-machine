@@ -8,16 +8,16 @@
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",
     "splash": {
-      "image": "./assets/images/splash-screen.png",
-      "resizeMode": "contain",
-      "backgroundColor": "red"
+      "image": "./assets/images/splash-screen1.png",
+      "resizeMode": "cover",
+      "backgroundColor": "black"      
     },
     "ios": {
       "supportsTablet": true
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/adapt-icon.png",
+        "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       }
     },
