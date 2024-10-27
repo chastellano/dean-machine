@@ -10,7 +10,7 @@
     "splash": {
       "image": "./assets/images/splash-screen1.png",
       "resizeMode": "cover",
-      "backgroundColor": "black"      
+      "backgroundColor": "#000000"
     },
     "ios": {
       "supportsTablet": true
@@ -19,7 +19,8 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "dean.machine"
     },
     "web": {
       "bundler": "metro",
@@ -31,6 +32,17 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "eas": {
+        "projectId": "f3272ac4-1143-498d-8dda-da11e9cf3874"
+      }
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/f3272ac4-1143-498d-8dda-da11e9cf3874"
     }
   }
 }
