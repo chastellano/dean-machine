@@ -1,9 +1,8 @@
 import { Image, StyleSheet, View, Pressable, useWindowDimensions, ImageBackground } from 'react-native';
 import { useEffect, useState } from 'react';
-import { Sound } from 'expo-av/build/Audio';
 import { Audio } from 'expo-av';
 
-let sound: Sound;
+let sound: Audio.Sound;
 
 export default function HomeScreen() {  
   const backgroundImage1 = require(`@/assets/images/scream-background-gradient-1.jpg`);
@@ -87,25 +86,27 @@ export default function HomeScreen() {
   return (
     <View style={{flex: 1, backgroundColor: background, justifyContent: "center", alignItems: "center",}}>    
       {
-      isPressed ? 
-      (
-        <ImageBackground source={backgroundImage} resizeMode="cover" style={{flex: 1, width: width, justifyContent: "center", alignItems: "center"}}>
+        isPressed ? 
+        (
+          <ImageBackground source={backgroundImage} resizeMode="cover" style={{flex: 1, width: width, justifyContent: "center", alignItems: "center"}}>
+              <Image
+                testID="after-image"
+                source={require('@/assets/images/scream-2-transparent.png')}
+                style={{ width: image2Width, height: image2Height, ...styles.scream2 }}
+              />
+          </ImageBackground>
+        ) 
+        : 
+        (
+          <Pressable
+            onPressIn={ () => handlePress() }>
             <Image
-              source={require('@/assets/images/scream-2-transparent.png')}
-              style={{ width: image2Width, height: image2Height, ...styles.scream2 }}
+              testID="before-image"            
+              source={require('@/assets/images/scream-1-transparent.png')}           
+              style={{ width: image1Width, height: image1Height, ...styles.scream1 }}
             />
-        </ImageBackground>
-      ) 
-      : 
-      (
-        <Pressable
-          onPressIn={ () => handlePress() }>
-          <Image
-            source={require('@/assets/images/scream-1-transparent.png')}           
-            style={{ width: image1Width, height: image1Height, ...styles.scream1 }}
-          />
-        </Pressable>
-      )
+          </Pressable>
+        )
       }
     </View>
   );
