@@ -72,9 +72,14 @@ export default function HomeScreen() {
   }
 
   const stopAndReset = async () => {
-    await SoundWrapper.stopAsync(sound);
-    setIsPressed(false);
-    setNewBackgroundImage();
+    try {
+      await SoundWrapper.stopAsync(sound);
+      setIsPressed(false);
+      setNewBackgroundImage();
+    }
+    catch(err) {
+      console.log(err);
+    }
   }
 
   useEffect(() => {    
@@ -82,38 +87,47 @@ export default function HomeScreen() {
   }, [])
 
   useEffect(() => {  
-    isPressed && stopSoundWhenFinishedPlaying();        
+    if (isPressed) stopSoundWhenFinishedPlaying()
+    else stopAndReset();        
   }, [isPressed]);
 
   const handlePress = async () => {
-    try {    
-      const { isPlaying } = (await SoundWrapper.getStatusAsync(sound)) as AVPlaybackStatusSuccess;
-
-      if (!isPlaying) {
-        SoundWrapper.playFromPositionAsync(sound, 0)
-        .then(() => {
-          setTimeout(() => {
-            setIsPressed(true);
-          }, pressDelay)
-        });
-      }
-    } 
-    catch(err) {
-      console.log(err);
-    }       
+    if(!isPressed) {
+      try {    
+        const { isPlaying } = (await SoundWrapper.getStatusAsync(sound)) as AVPlaybackStatusSuccess;
+  
+        if (!isPlaying) {
+          SoundWrapper.playFromPositionAsync(sound, 0)
+          .then(() => {
+            setTimeout(() => {
+              setIsPressed(true);
+            }, pressDelay)
+          });
+        }       
+      } 
+      catch(err) {
+        console.log(err);
+      }       
+    }
+    else {
+      setIsPressed(false);
+    }
   }
 
   return (
     <View style={{flex: 1, backgroundColor: "black", justifyContent: "center", alignItems: "center"}}>    
       {
         isPressed ? 
-        (
+        (          
           <ImageBackground source={backgroundImage} resizeMode="cover" style={{flex: 1, width: width, justifyContent: "center", alignItems: "center"}}>
-            <Image
-              testID="after-image"
-              source={require('@/assets/images/scream-2-transparent.png')}
-              style={{ width: image2Width, height: image2Height, ...styles.scream2 }}
-            />
+            <Pressable
+              onPressIn={ () => handlePress() }>
+              <Image
+                testID="after-image"
+                source={require('@/assets/images/scream-2-transparent.png')}
+                style={{ width: image2Width, height: image2Height, ...styles.scream2 }}
+              />
+            </Pressable>
           </ImageBackground>
         ) 
         : 

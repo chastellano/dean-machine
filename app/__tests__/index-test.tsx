@@ -123,7 +123,7 @@ test('calls stopAsync when getStatusAsync throws exception', async () => {
 
   const mockStopAsync = jest.fn();
   SoundWrapper.stopAsync = mockStopAsync;
-  
+
   render(<HomeScreen/>);
   const beforeImage = await screen.findByTestId('before-image');
   
@@ -133,4 +133,28 @@ test('calls stopAsync when getStatusAsync throws exception', async () => {
     await act(async () => await jest.runOnlyPendingTimersAsync());
   }
   expect(mockStopAsync).toHaveBeenCalled();
+});
+
+test('calls stopAsync when sound is playing and image is pressed', async () => {
+  jest.useFakeTimers();
+
+  const mockGetStatusAsync = jest.fn();
+  mockGetStatusAsync.mockResolvedValueOnce({ isPlaying: false });
+  mockGetStatusAsync.mockResolvedValue({ isPlaying: true });
+
+  SoundWrapper.getStatusAsync = mockGetStatusAsync;
+
+  const mockStopAsync = jest.fn();
+  SoundWrapper.stopAsync = mockStopAsync;
+  
+  render(<HomeScreen/>);
+  const beforeImage = await screen.findByTestId('before-image');
+  
+  await userEvent.press(beforeImage);
+  const afterImage = await screen.findByTestId('after-image');
+
+  await userEvent.press(afterImage);
+
+  expect(mockStopAsync).toHaveBeenCalled();
+  await waitFor(() => expect(screen.getByTestId('before-image')))
 });
