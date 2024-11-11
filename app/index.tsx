@@ -24,7 +24,6 @@ export default function HomeScreen() {
   const image2Width = width * 0.6;
   const image2Height = image2Width * 1.1;
 
-  const resetDelay = 1400;
   const pressDelay = 175;
   
   const setNewBackgroundImage = () => {
@@ -56,8 +55,7 @@ export default function HomeScreen() {
         const { isPlaying } = (await SoundWrapper.getStatusAsync(sound)) as AVPlaybackStatusSuccess;
   
         if (!isPlaying || counter > 15) {
-          await SoundWrapper.stopAsync(sound);
-
+          stopAndReset();
           return;
         }         
   
@@ -66,12 +64,17 @@ export default function HomeScreen() {
       }
 
       catch(err) {
-        await SoundWrapper.stopAsync(sound);
-
+        stopAndReset();
         return;
       }
 
     }, 100)
+  }
+
+  const stopAndReset = async () => {
+    await SoundWrapper.stopAsync(sound);
+    setIsPressed(false);
+    setNewBackgroundImage();
   }
 
   useEffect(() => {    
@@ -79,29 +82,19 @@ export default function HomeScreen() {
   }, [])
 
   useEffect(() => {  
-    if (isPressed) {
-      
-      setTimeout(async () => {
-        if(isPressed) {
-          setIsPressed(false);
-          setNewBackgroundImage();
-          await stopSoundWhenFinishedPlaying();
-        }
-      }, resetDelay)
-    }
-    
+    isPressed && stopSoundWhenFinishedPlaying();        
   }, [isPressed]);
 
   const handlePress = async () => {
     try {    
       const { isPlaying } = (await SoundWrapper.getStatusAsync(sound)) as AVPlaybackStatusSuccess;
-      if (!isPlaying) {
 
+      if (!isPlaying) {
         SoundWrapper.playFromPositionAsync(sound, 0)
         .then(() => {
           setTimeout(() => {
-            setIsPressed(true);         
-          }, pressDelay)            
+            setIsPressed(true);
+          }, pressDelay)
         });
       }
     } 
