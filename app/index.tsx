@@ -1,18 +1,21 @@
 import { Image, StyleSheet, View, Pressable, useWindowDimensions, ImageBackground } from 'react-native';
 import { useEffect, useState } from 'react';
-import { Audio } from 'expo-av';
+import { AVPlaybackStatusSuccess } from 'expo-av';
+import { SoundWrapper } from './sound-wrapper'
+import { Sound } from 'expo-av/build/Audio';
 
-let sound: Audio.Sound;
+let sound: Sound;
 
 export default function HomeScreen() {  
   const backgroundImage1 = require(`@/assets/images/scream-background-gradient-1.jpg`);
   const backgroundImage2 = require(`@/assets/images/scream-background-gradient-2.jpg`);
   const backgroundImage3 = require(`@/assets/images/scream-background-gradient-3.jpg`);
-  const backgroundImages = [backgroundImage1, backgroundImage2, backgroundImage3]
 
-  const [isPressed, setIsPressed] = useState<Boolean>(false);
-  const [background, setBackground] = useState<string>('black');
-  const [backgroundImage, setBackgroundImage] = useState(backgroundImages[0]);
+  const backgroundImages = [backgroundImage1, backgroundImage2, backgroundImage3]
+  const screamAudio = require('@/assets/audio/the-scream.mp3')
+
+  const [ isPressed, setIsPressed ] = useState<Boolean>(false);
+  const [ backgroundImage, setBackgroundImage ] = useState(backgroundImages[0]);
   const { width } = useWindowDimensions();
 
   const image1Width = width * 0.5;
@@ -21,7 +24,7 @@ export default function HomeScreen() {
   const image2Width = width * 0.6;
   const image2Height = image2Width * 1.1;
 
-  const resetCountdown = 750;
+  const resetDelay = 1400;
   const pressDelay = 175;
   
   const setNewBackgroundImage = () => {
@@ -34,66 +37,90 @@ export default function HomeScreen() {
   }
 
   const loadSound = async () => {
-    sound = new Audio.Sound();
+    sound = SoundWrapper.newSound();
 
     try {
-        await sound.loadAsync(require('@/assets/audio/the-scream.mp3'));        
+      await SoundWrapper.loadSoundAsync(sound, screamAudio);
     }
     catch(err) {
       console.log(err)
     }
   }
 
-  useEffect(() => {
+  let counter = 0;
+
+  const stopSoundWhenFinishedPlaying = async () => {      
+          
+    setTimeout(async () => {
+      try {
+        const { isPlaying } = (await SoundWrapper.getStatusAsync(sound)) as AVPlaybackStatusSuccess;
+  
+        if (!isPlaying || counter > 15) {
+          await SoundWrapper.stopAsync(sound);
+
+          return;
+        }         
+  
+        counter++;             
+        stopSoundWhenFinishedPlaying();                        
+      }
+
+      catch(err) {
+        await SoundWrapper.stopAsync(sound);
+
+        return;
+      }
+
+    }, 100)
+  }
+
+  useEffect(() => {    
     loadSound();
   }, [])
 
   useEffect(() => {  
     if (isPressed) {
-      setBackground('red')
       
-      setTimeout(() => {
+      setTimeout(async () => {
         if(isPressed) {
-          setBackground('black');
           setIsPressed(false);
           setNewBackgroundImage();
+          await stopSoundWhenFinishedPlaying();
         }
-      }, resetCountdown)
+      }, resetDelay)
     }
-    else {
-      setBackground('black')
-    }
+    
   }, [isPressed]);
 
   const handlePress = async () => {
-    if (sound) {
-      try {      
-        sound.playAsync()
+    try {    
+      const { isPlaying } = (await SoundWrapper.getStatusAsync(sound)) as AVPlaybackStatusSuccess;
+      if (!isPlaying) {
+
+        SoundWrapper.playFromPositionAsync(sound, 0)
         .then(() => {
           setTimeout(() => {
-            setIsPressed(true);
+            setIsPressed(true);         
           }, pressDelay)            
         });
-
-        await sound.setPositionAsync(0);
       }
-      catch(err) {
-        console.log(err);
-      }
-    }    
+    } 
+    catch(err) {
+      console.log(err);
+    }       
   }
 
   return (
-    <View style={{flex: 1, backgroundColor: background, justifyContent: "center", alignItems: "center",}}>    
+    <View style={{flex: 1, backgroundColor: "black", justifyContent: "center", alignItems: "center"}}>    
       {
         isPressed ? 
         (
           <ImageBackground source={backgroundImage} resizeMode="cover" style={{flex: 1, width: width, justifyContent: "center", alignItems: "center"}}>
-              <Image
-                testID="after-image"
-                source={require('@/assets/images/scream-2-transparent.png')}
-                style={{ width: image2Width, height: image2Height, ...styles.scream2 }}
-              />
+            <Image
+              testID="after-image"
+              source={require('@/assets/images/scream-2-transparent.png')}
+              style={{ width: image2Width, height: image2Height, ...styles.scream2 }}
+            />
           </ImageBackground>
         ) 
         : 
