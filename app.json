@@ -21,7 +21,8 @@
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#db3434"
       },
-      "package": "dean.machine"
+      "package": "dean.machine",
+      "versionCode": 6
     },
     "web": {
       "bundler": "metro",
